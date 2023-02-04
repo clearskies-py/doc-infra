@@ -39,6 +39,6 @@ def application(event, context):
 Or from the command line:
 
 {% highlight python %}
-cli = clearskies_aws.contexts.cli(hello_word)
+cli = clearskies.contexts.cli(hello_word)
 cli()
 {% endhighlight %}
