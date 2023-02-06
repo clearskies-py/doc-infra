@@ -2,7 +2,7 @@
 layout: default
 title: Sideloading
 parent: Overview
-nav_order: 4
+nav_order: 3
 ---
 
 # Sideloading

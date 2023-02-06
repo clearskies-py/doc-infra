@@ -11,7 +11,7 @@ clearskies is an opinionated Python framework intended for developing microservi
 # And Go!
 
 ```
-pip3 install clear-skies
+pip install clear-skies
 ```
 
 or

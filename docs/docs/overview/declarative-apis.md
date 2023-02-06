@@ -2,7 +2,7 @@
 layout: default
 title: Declarative APIs
 parent: Overview
-nav_order: 5
+nav_order: 4
 ---
 
 # Declarative APIs
@@ -57,7 +57,8 @@ uwsgi --http :9090 --wsgi-file my_products_api.py
 and finally you can execute curl commands against your new API:
 
 ```
-curl 'http://localhost:9090' -d '{"name":"My First API","description":"A great start","price":125.50}'
+curl 'http://localhost:9090' \
+    -d '{"name":"My First API","description":"A great start","price":125.50}'
 ```
 
 Which responds with something like:
@@ -82,7 +83,8 @@ Which responds with something like:
 It comes with strict error checking.  With this curl command we'll leave out the name (which we declared as required in our model) and also pass in a string for the price:
 
 ```
-curl 'http://localhost:9090' -d '{"name":"","description":"A great start","price":"my dear aunt sally"}'
+curl 'http://localhost:9090' \
+    -d '{"name":"","description":"A great start","price":"my dear aunt sally"}'
 ```
 
 which returns:
