@@ -17,8 +17,8 @@ import clearskies
 def my_function(utcnow):
     return utcnow.isoformat()
 
-my_application = clearskies.contexts.cli(my_function)
-my_application()
+my_cli_application = clearskies.contexts.cli(my_function)
+my_cli_application()
 {% endhighlight %}
 
 `utcnow` is one of many dependency injection names provided by clearskies by default.  It is populated with a datetime object set to the current time in the UTC time zone.  Running the above program should return something like this:
