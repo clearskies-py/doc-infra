@@ -14,6 +14,8 @@ This is the list of standard configuration values for handlers in clearskies.  E
 |------|---------------|---------------|-------------|
 | [response_headers](#response-headers) | Dict | `None` | Additional headers to include in the response |
 | [authentication](#authentication) | clearskies.authentication | `None` | Authentication object to authenticate the request |
+| [authorization](#authorization) | Class or callable | `None` | Authorization rules for the endpoint |
+| [output_map](#output-map) | Callable | `None` | Function to modify the final response to the client |
 
 
 ### Response Headers
@@ -41,13 +43,7 @@ def application(env, start_response):
     return application_with_headers(env, start_response)
 {% endhighlight %}
 
-You can then launch this application locally:
-
-```
-uwsgi --http :9090 --wsgi-file example.py
-```
-
-And if you call it like so:
+[Run it locally](/docs/running-examples#running-examples-designed-for-an-http-server) and then call it like so:
 
 ```
 curl -i 'http://localhost:9090'
@@ -84,3 +80,11 @@ application_with_headers = clearskies.contexts.wsgi({
 def application(env, start_response):
     return application_with_headers(env, start_response)
 ```
+
+### Authorization
+
+There are a variety of options for enfocring authorization on your endpoints.  This is a key part of clearskies behavior, so [it has its own section in the documentation](/docs/authn-authz).
+
+### Output Map
+
+Many clearskies handlers will automatically generate the response to the client for you based off of the logic built into columns.  There are also options to adjust capitalization as needed.  However, sometimes you want to rely on the core behavior provided by a clearskies handler but need more control over the final response.  This use-case is what the output map is for.  You provide a function which will be called for each record in the response, and provide the final data that should be passed along to the client.

@@ -21,7 +21,7 @@ my_cli_application = clearskies.contexts.cli(my_function)
 my_cli_application()
 {% endhighlight %}
 
-`utcnow` is one of many dependency injection names provided by clearskies by default.  It is populated with a datetime object set to the current time in the UTC time zone.  Running the above program should return something like this:
+`utcnow` is one of many dependency injection names provided by clearskies by default.  It is populated with a datetime object set to the current time in the UTC time zone.  [Running the above program](/docs/running-examples#running-examples-designed-for-the-cli) should return something like this:
 
 {% highlight json %}
 {

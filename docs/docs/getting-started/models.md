@@ -92,7 +92,7 @@ if __name__ == '__main__':
     cli()
 {% endhighlight %}
 
-Running this will print out:
+[Running this](/docs/running-examples#running-examples-designed-for-the-cli`) will print out:
 
 ```
 The new price of dog food: 113.5
