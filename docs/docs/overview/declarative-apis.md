@@ -29,8 +29,8 @@ class Product(clearskies.Model):
                 input_requirements=[clearskies.input_requirements.required()]
             ),
             clearskies.column_types.float('price'),
-            clearskies.column_types.created('created'),
-            clearskies.column_types.updated('updated'),
+            clearskies.column_types.created('created_at'),
+            clearskies.column_types.updated('updated_at'),
         ])
 
 products_api = clearskies.contexts.wsgi({
@@ -38,7 +38,7 @@ products_api = clearskies.contexts.wsgi({
     'handler_config': {
         'authentication': clearskies.authentication.public(),
         'model_class': Product,
-        'readable_columns': ['name', 'description', 'price', 'created', 'updated'],
+        'readable_columns': ['name', 'description', 'price', 'created_at', 'updated_at'],
         'writeable_columns': ['name', 'description', 'price'],
         'searchable_columns': ['name', 'description', 'price'],
         'default_sort_column': 'name',
