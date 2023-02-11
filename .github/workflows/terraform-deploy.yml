@@ -61,4 +61,33 @@ jobs:
         run: cd ./terraform && terraform plan -no-color -var="cloudfront_password=${{ env.cloudfront_password }}"
       - name: Deploy
         id: terraform-deploy
-        run: cd ./terraform && terraform apply --auto-approve
+        run: cd ./terraform && terraform apply --auto-approve -var="cloudfront_password=${{ env.cloudfront_password }}"
+  deploy-blog:
+    if: github.ref == ${{ github.event.repository.default_branch }}
+    needs: [deploy-infrastructure]
+    runs-on: ubuntu-latest
+    name: Buid and Deploy Blog
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: AWS Login
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_LOGIN_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Install Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+      - name: Build and Deploye the Docs
+        run: |
+          cd docs
+          bundle install
+          bundle exec jekyll build
+          cd _site
+          aws s3 cp . s3://clearskies.info --recursive
