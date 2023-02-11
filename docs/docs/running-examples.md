@@ -2,7 +2,7 @@
 layout: default
 title: Running Examples
 permalink: /docs/running-examples
-nav_order: 11
+nav_order: 2
 ---
 
 # Running These Examples

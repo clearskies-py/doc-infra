@@ -30,7 +30,16 @@ class Product(clearskies.Model):
         ])
 {% endhighlight %}
 
-It declares a schema with 5 columns with various column types: `name`, `description`, `price`, `created_at`, and `updated_at`.  The first three are fairly straight forward.  The last two columns are special datetime columns.  A column with the `created` column type will automatically record the time when a model is created.  Similarly, a column with the `updated` column type automatically records when the model is updated.
+The `__init__` method accepts a `memory_backend` object and the `columns` object.  These are two pre-defined dependency injection values in clearskies.  The `memory_backend` object is what causes this model class to use the in-memory data store available in clearskies.  As a different example, had the init method been defined like so:
+
+```
+    def __init__(self, cursor_backend, columns):
+        super().__init__(cursor_backend, columns)
+```
+
+Then it would try to connect to an SQL database and use that for a datastore.  There are [a few kinds of backends available in clearskies](/docs/backends), and of course you can easily define and include your own, dropping them into a model in the same basic way.
+
+Next, the model declares a schema with 5 columns with various column types: a `name` column (which is a string), a `description` column (also a string), a `price` column (a float), a `created_at` column (of the `created` type), and an `updated_at` column (of the `updated` time).  The last two columns are special datetime columns.  A column with the `created` column type will automatically record the time when a model is created.  Similarly, a column with the `updated` column type automatically records when the model is updated.
 
 To use our model, we need to inform our dependency injection container about it and then our function can request it as a parameter.  The dependency injection system for clearskies looks at parameter names to decide what to inject, rather than variable types.  In accordance with PEP8, dependency injection names use snake case by default (since PEP8 dictates that varible names should be in snake case).  Therefore, when you tell clearskies to provision a class for dependency injection, it automatically converts the class name into snake case to generate the dependency injection name.  Finally, for the special case of models, clearskies also makes it available under the pluralized version of the class name.  This allows the "grammar" of your application to be more readable.  Here's some examples of declaring our model, creating a function that uses it to create/modify/sort through records, and then executing it in the CLI context:
 
