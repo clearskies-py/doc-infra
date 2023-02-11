@@ -78,16 +78,15 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_LOGIN_ROLE_ARN }}
           aws-region: us-east-1
-      - name: Install Ruby
-        uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0'
+          bundler-cache: true
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
-      - name: Build and Deploye the Docs
+      - name: Build and Deploy the Docs
         run: |
           cd docs
-          bundle install
           bundle exec jekyll build
           cd _site
           aws s3 cp . s3://clearskies.info --recursive
