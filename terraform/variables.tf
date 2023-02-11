@@ -11,6 +11,7 @@ variable "domain" {
 variable "cloudfront_password" {
   type = string
   description = "A 'password' shared by cloudfront and the bucket, which helps lock the bucket down to cloudfront"
+  sensitive = true
 }
 
 variable "aws_region" {

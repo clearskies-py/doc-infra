@@ -1,0 +1,31 @@
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Terraform Plan
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: AWS Login
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_LOGIN_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Fetch secrets from AKeyless
+        id: fetch-secrets
+        uses: LanceMcCarthy/akeyless-action@v3
+        with:
+          access-id: ${{ secrets.AKEYLESS_ACCESS_ID }}
+          static-secrets: '{"/cloudfront_password":"cloudfront_password"}'
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Init
+        id: terraform-init
+        run: cd ./terraform && terraform init
+      - name: Plan
+        id: terraform-plan
+        run: cd ./terraform && terraform plan -no-color -var="cloudfront_password=${{ env.cloudfront_password }}"
