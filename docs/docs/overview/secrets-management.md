@@ -2,6 +2,7 @@
 layout: default
 title: Secrets Management
 parent: Overview
+permalink: /docs/overview/secrets-management.html
 nav_order: 5
 ---
 

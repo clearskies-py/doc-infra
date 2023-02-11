@@ -2,7 +2,7 @@
 layout: default
 title: Standard Configs
 parent: Handlers
-permalink: /docs/handlers/standard-configs
+permalink: /docs/handlers/standard-configs.html
 nav_order: 1
 ---
 

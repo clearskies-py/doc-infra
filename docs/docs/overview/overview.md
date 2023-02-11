@@ -2,7 +2,7 @@
 layout: default
 title: Overview
 has_children: true
-permalink: /docs/overview
+permalink: /docs/overview/index.html
 nav_order: 1
 ---
 

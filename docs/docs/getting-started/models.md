@@ -2,7 +2,7 @@
 layout: default
 title: Models
 parent: Getting Started
-permalink: /docs/getting-started/models
+permalink: /docs/getting-started/models.html
 nav_order: 2
 ---
 

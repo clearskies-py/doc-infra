@@ -2,6 +2,7 @@
 layout: default
 title: Declarative APIs
 parent: Overview
+permalink: /docs/overview/declarative-apis.html
 nav_order: 4
 ---
 

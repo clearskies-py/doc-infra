@@ -2,6 +2,7 @@
 layout: default
 title: Sideloading
 parent: Overview
+permalink: /docs/overview/sideloading.html
 nav_order: 3
 ---
 

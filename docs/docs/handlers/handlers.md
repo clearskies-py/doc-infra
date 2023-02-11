@@ -2,7 +2,7 @@
 layout: default
 title: Handlers
 has_children: true
-permalink: /docs/handlers
+permalink: /docs/handlers/index.html
 nav_order: 4
 ---
 

@@ -2,6 +2,7 @@
 layout: default
 title: Reusable Business Logic
 parent: Overview
+permalink: /docs/overview/reusable-business-logic.html
 nav_order: 1
 ---
 

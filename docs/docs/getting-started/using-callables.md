@@ -2,7 +2,7 @@
 layout: default
 title: Using Callables
 parent: Getting Started
-permalink: /docs/getting-started/callables
+permalink: /docs/getting-started/callables.html
 nav_order: 1
 ---
 
