@@ -328,4 +328,4 @@ and you'll see a response in TitleCase:
 
 ### Security Headers
 
-clearskies comes with ready-to-use configurations for security headers.  They can be dropped into an endpoint via the `security_headers` configuration.
+clearskies comes with ready-to-use configurations for security headers.  They can be dropped into an endpoint via the `security_headers` configuration.  Since there are a variety of possible security headers, the details are [documented elsewhere](/docs/security-headers/index.html).

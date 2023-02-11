@@ -37,7 +37,7 @@ The `__init__` method accepts a `memory_backend` object and the `columns` object
         super().__init__(cursor_backend, columns)
 ```
 
-Then it would try to connect to an SQL database and use that for a datastore.  There are [a few kinds of backends available in clearskies](/docs/backends), and of course you can easily define and include your own, dropping them into a model in the same basic way.
+Then it would try to connect to an SQL database and use that for a datastore.  There are [a few kinds of backends available in clearskies](/docs/backends/index.html), and of course you can easily define and include your own, dropping them into a model in the same basic way.
 
 Next, the model declares a schema with 5 columns with various column types: a `name` column (which is a string), a `description` column (also a string), a `price` column (a float), a `created_at` column (of the `created` type), and an `updated_at` column (of the `updated` time).  The last two columns are special datetime columns.  A column with the `created` column type will automatically record the time when a model is created.  Similarly, a column with the `updated` column type automatically records when the model is updated.
 
