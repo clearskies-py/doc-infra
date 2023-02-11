@@ -7,7 +7,7 @@ terraform {
   }
   backend "s3" {
     bucket = "always-upgrade-terraform-state"
-    key    = "blog.json"
+    key    = "clearskies.info.json"
     region = "us-east-1"
   }
 }
