@@ -87,6 +87,7 @@ jobs:
       - name: Build and Deploy the Docs
         run: |
           cd docs
+          bundle install
           bundle exec jekyll build
           cd _site
           aws s3 cp . s3://clearskies.info --recursive
