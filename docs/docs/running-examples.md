@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Running Examples
-permalink: /docs/running-examples
+permalink: /docs/running-examples.html
 nav_order: 2
 ---
 
