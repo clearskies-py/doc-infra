@@ -20,7 +20,7 @@ jobs:
         uses: LanceMcCarthy/akeyless-action@v3
         with:
           access-id: ${{ secrets.AKEYLESS_ACCESS_ID }}
-          static-secrets: '{"/cloudfront_password":"cloudfront_password"}'
+          static-secrets: '{"/aws/cloudfront_password":"cloudfront_password"}'
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Init
