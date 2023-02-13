@@ -8,6 +8,10 @@ nav_order: 10
 
 # List
 
+ 1. [Overview](#overview)
+ 2. [Configuration](#configuration)
+ 3. [Examples](#examples)
+
 ## Overview
 
 The List handler returns lists of records to the client.  It's also used as a base class for the various kinds of search handlers.  It's children all share the same basic configuration options, which are described below
@@ -22,7 +26,7 @@ The list backend has the following configuration options:
 | [model](#model) | Yes, unless `model_class` is provided | Model instance |
 | [default_sort_column](#default-sort-column) | Yes | `str` |
 | [readable_columns](#readable-columns) | Yes | `List[str]` |
-| [searchable_columns](#searchable-columns) | Yes | `List[str]` |
+| [searchable_columns](#searchable-columns) | Yes (if supported) | `List[str]` |
 | [sortable_columns](#sortable-columns) | No | `List[str]` |
 | [default_sort_direction](#default-sort-column) | No | `str` |
 | [default_limit](#default-limit) | No | `int` |
@@ -51,7 +55,7 @@ A list of column names from the model which should be included in the data retur
 
 ### Searchable Columns
 
-A list of column names from the model which the client is allowed to search by.  Of course, each column must exist in the model schema and have a type that supports searching.  Note that the base `List` handler itself does **not** support searching, but all its child classes do.
+A list of column names from the model which the client is allowed to search by.  Of course, each column must exist in the model schema and have a type that supports searching.  Note that the base `List` handler itself does **not** support searching and so this is not required or applicable when using the `List` handler.  However, all the child classes of the `List` handler support searching and require this configuration setting.
 
 ### Sortable Columns
 
@@ -71,8 +75,50 @@ The maximum record limit that a user can request.  This is `200` by default but 
 
 ### Where
 
+A list of query conditions that should always be applied to the results.  The conditions can take one of two forms:
+
+ 1. A literal query condition (e.g. 'status=open', 'price>=100')
+ 2. A function which must accept (and return) a model object as well as other dependencies
+
+Note that both options can be used together.  For the first option, the query string will be automatically passed along to the models object when fetching records.  Here's a partial example:
+
+```
+cheap_sales = clearskies.Application(
+    clearskies.handlers.List,
+    {
+        'model_class': models.Product,
+        'default_sot_column': 'name',
+        'readable_columns': ['name', 'price', 'type', 'in_stock', 'on_sale', 'sale_end_date'],
+        'where': [
+            'on_sale=1',
+            'price<15',
+        ]
+    }
+)
+```
+
+And here's an example of using the second option (as well as combining it with the first):
+
+```
+def sale_ending_soon(models, utcnow):
+    return models.where('sale_end_date<' + (utcnow+datetime.timedelta(days=1)).isoformat())
+
+cheap_sales_ending_soon = clearskies.Application(
+    clearskies.handlers.List,
+    {
+        'model_class': models.Product,
+        'default_sot_column': 'name',
+        'readable_columns': ['name', 'price', 'type', 'in_stock', 'on_sale', 'sale_end_date'],
+        'where': [
+            'price<15',
+            sale_ending_soon,
+        ]
+    }
+)
+```
+
 ### Join
 
 ### Group By
 
-## Examples and Endpoint Behavior
+## Examples
