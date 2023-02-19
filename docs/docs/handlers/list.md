@@ -100,7 +100,7 @@ cheap_sales = clearskies.Application(
 And here's an example of using the second option (as well as combining it with the first):
 
 ```
-def sale_ending_soon(models, utcnow):
+def sale_ending_soon(models, utcnow, input_output, routing_data):
     return models.where('sale_end_date<' + (utcnow+datetime.timedelta(days=1)).isoformat())
 
 cheap_sales_ending_soon = clearskies.Application(
@@ -119,6 +119,152 @@ cheap_sales_ending_soon = clearskies.Application(
 
 ### Join
 
+The `join` configuration allows you to provide a list of join instructions which are set on the models object (via `models.join()`) before fetching records.
+
+```
+tag_filter = clearskies.Application(
+    clearskies.handlers.List,
+    {
+        'model_class': models.Product,
+        'default_sot_column': 'name',
+        'readable_columns': ['name', 'price', 'type', 'in_stock', 'on_sale', 'sale_end_date'],
+        'join': [
+            "JOIN tags ON tags.product_id=products.id AND tags.name='new'",
+        ]
+    }
+)
+```
+
 ### Group By
 
+The `group_by` configuration allows you to provide a column to group the underlying query on, which is passed in via the `models.group_by()` method before fetching reocrds.
+
+```
+tag_filter = clearskies.Application(
+    clearskies.handlers.List,
+    {
+        'model_class': models.Product,
+        'default_sot_column': 'name',
+        'readable_columns': ['name', 'price', 'type', 'in_stock', 'on_sale', 'sale_end_date'],
+        'group_by': 'type',
+    }
+)
+```
+
 ## Examples
+
+Here's a basic example of using the list handler.  It uses the example backend to pre-populate data in the memory backend so that you can immediately test the endpoint:
+
+{% highlight python %}
+import clearskies
+from clearskies.column_types import string, float, integer, datetime
+from collections import OrderedDict
+
+class Product(clearskies.Model):
+    def __init__(self, example_products_backend, columns):
+        super().__init__(example_products_backend, columns)
+
+    def columns_configuration(self):
+        return OrderedDict([
+            string('name'),
+            float('cost'),
+            float('price'),
+            string('type'),
+            integer('in_stock'),
+            integer('on_sale'),
+        ])
+
+products_api = clearskies.contexts.wsgi(
+    {
+        'handler_class': clearskies.handlers.List,
+        'handler_config': {
+            'authentication': clearskies.authentication.public(),
+            'model_class': Product,
+            'default_sort_column': 'name',
+            'readable_columns': ['name', 'price', 'type', 'in_stock', 'on_sale'],
+        },
+    },
+    bindings={
+        'example_products_backend': clearskies.BindingConfig(
+            clearskies.backends.ExampleBackend,
+            data=[
+                {'id': 1, 'name': 'toy', 'price': 52.50, 'type': 'kids', 'in_stock': 150, 'on_sale': 0},
+                {'id': 2, 'name': 'car', 'price': 32000, 'type': 'vehicle', 'in_stock': 1, 'on_sale': 1},
+                {'id': 3, 'name': 'chainsaw', 'price': 250, 'type': 'tool', 'in_stock': 10, 'on_sale': 1},
+            ]
+        )
+    }
+)
+def application(env, start_response):
+    return products_api(env, start_response)
+{% endhighlight %}
+
+[Run this example locally](/docs/running-examples.html#running-examples-designed-for-an-http-server) and then you can try a simple curl request:
+
+```
+curl 'http://localhost:9090'
+```
+
+and you will see results like so:
+
+{% highlight json %}
+{
+  "status": "success",
+  "error": "",
+  "data": [
+    {
+      "id": 2,
+      "name": "car",
+      "price": 32000,
+      "type": "vehicle",
+      "in_stock": 1,
+      "on_sale": 1
+    },
+    {
+      "id": 3,
+      "name": "chainsaw",
+      "price": 250,
+      "type": "tool",
+      "in_stock": 10,
+      "on_sale": 1
+    },
+    {
+      "id": 1,
+      "name": "toy",
+      "price": 52.5,
+      "type": "kids",
+      "in_stock": 150,
+      "on_sale": 0
+    }
+  ],
+  "pagination": {
+    "number_results": 3,
+    "limit": 100,
+    "next_page": {}
+  },
+  "input_errors": {}
+}
+{% endhighlight %}
+
+When calling the base list endpoint you can set the following settings in a URL parameter:
+
+| Name | Description |
+| `sort` | The name of the column to sort by |
+| `direction` | The direction to sort (`asc` or `desc`) |
+| `start`* | Pagination control |
+| `limit` | The maximum number of records to return |
+
+To see how these work, try out the following curl commands against your local server:
+
+```
+# change sort column/direction
+curl 'http://localhost:9090?sort=name&direction=desc'
+
+# change limit and note the `next_page` parameter in the `pagination` key of the response
+curl 'http://localhost:9090?start=1&limit=1'
+
+# invalid sort direction results in 4xx error
+curl 'http://localhost:9090?sort=not-a-column&direction=desc'
+```
+
+***Note**: The pagination parameters are backend specific.  The memory and cursor backends use `start`, but different backends may expect different column names and also return different data in the `pagination` key of the response.  The pagination columns are documented on a per-backend basis.  As a result, the exact behavior exposed by the List handler may vary with your choice of backend.  Note that this fact is automatically reflected in the auto documentation generated by clearskies.
