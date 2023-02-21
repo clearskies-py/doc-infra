@@ -218,10 +218,142 @@ You would receive the expected input errors:
 }
 {% endhighlight %}
 
-Note that since price is not required, it may be absent from the `request_data`.
+Note that since price is **not** required, it will be absent from the `request_data` if not provided by the end user - clearskies will not automatically fill it with `None`.
+
+Attaching a model class for the schema can be convenient if your endpoint is going to be interacting with a model class, but this won't help for one-off endpoints that aren't working with a model.  In this case you can just attach column definitions directly like so:
+
+{% highlight python %}
+import clearskies
+from clearskies.column_types import string, float
+from clearskies.input_requirements import required
+
+def example_callable(request_data):
+    return request_data
+
+callable_demo = clearskies.contexts.wsgi(
+    {
+        'handler_class': clearskies.handlers.Callable,
+        'handler_config': {
+            'authentication': clearskies.authentication.public(),
+            'callable': example_callable,
+            'schema': [
+                string('name', input_requirements=[required()]),
+                float('price'),
+            ],
+        },
+    },
+)
+def application(env, start_response):
+    return callable_demo(env, start_response)
+{% endhighlight %}
 
 ### Writeable Columns
 
+Writeable columns is mainly intended for working with a schema from a model.  It allows you to specify a sub-set of columns from the model that are writeable (which can help if the model has columns that are only intended for internal usage).  Consider the following example where a model with two columns is used as the schema but only one column is in the list of writeable columns:
+
+{% highlight python %}
+import clearskies
+from clearskies.column_types import string, float
+from clearskies.input_requirements import required
+from collections import OrderedDict
+
+def example_callable(request_data):
+    return request_data
+
+class Product(clearskies.Model):
+    def __init__(self, memory_backend, columns):
+        super().__init__(memory_backend, columns)
+
+    def columns_configuration(self):
+        return OrderedDict([
+            string('name', input_requirements=[required()]),
+            float('price'),
+        ])
+
+callable_demo = clearskies.contexts.wsgi(
+    {
+        'handler_class': clearskies.handlers.Callable,
+        'handler_config': {
+            'authentication': clearskies.authentication.public(),
+            'callable': example_callable,
+            'schema': Product,
+        },
+    },
+)
+def application(env, start_response):
+    return callable_demo(env, start_response)
+{% endhighlight %}
+
+If you [run it locally](docs/running-examples.html#running-examples-designed-for-an-http-server) and call the server like so:
+
+```
+curl 'http://localhost:9090' -d '{"name": "toys", "price": 85.50}'
+```
+
+you will get an input error:
+
+{% highlight json %}
+{
+  "status": "input_errors",
+  "error": "",
+  "data": [],
+  "pagination": {},
+  "input_errors": {
+    "name": "Input column 'name' is not an allowed column"
+  }
+}
+{% endhighlight %}
+
+Since the `name` column is not in the list of writeable columns (even though it exists in the model) clearskies returns an input error if the client tries to set it.
+
+**Note:** This has a subtle but important implication: it effectively disables the "required" setting of the `name` column.  Since the name is no longer exposed from this endpoint, it is necessarily _not_ a required input.
+
 ### Doc Model Name
 
+`doc_model_name` allows you to set the name of the model that will be referenced when the response of the endpoint is documented by the autodoc system via OpenAPI3.0/swagger.  This only operates in conjunction with the `doc_response_data_schema` option, since otherwise clearskies doesn't know what the response looks like (and therefore can't document it).
+
 ### Doc Response Data Schema
+
+`doc_response_data_schema` allows you to specify the schema of your response for the autodoc system.  Note that the Callable handler will not make an autodoc by itself, so you normally need the simple routing handler to demonstrate this behavior:
+
+{% highlight python %}
+import clearskies
+
+def example_callable():
+    return {
+        "name": "hey",
+        "price": 27.50,
+    }
+
+doc_demo = clearskies.contexts.wsgi(
+    {
+        'handler_class': clearskies.handlers.SimpleRouting,
+        'handler_config': {
+            'authentication': clearskies.authentication.public(),
+            'schema_route': 'schema',
+            'routes': [
+                {
+                    'path': 'example_callable',
+                    'handler_class': clearskies.handlers.Callable,
+                    'handler_config': {
+                        'callable': example_callable,
+                        'doc_model_name': 'product',
+                        'doc_response_data_schema': [
+                            clearskies.autodoc.schema.String('name'),
+                            clearskies.autodoc.schema.Number('price'),
+                        ]
+                    },
+                }
+            ],
+        },
+    },
+)
+def application(env, start_response):
+    return doc_demo(env, start_response)
+{% endhighlight %}
+
+If you [run it locally](docs/running-examples.html#running-examples-designed-for-an-http-server) you can see the resultant swagger doc like so:
+
+```
+curl 'http://localhost:9090/schema'
+```
