@@ -26,4 +26,4 @@ or
 poetry add clear-skies
 ```
 
-For more details see the [overview](docs/overview.html) to understand why this exists or skip ahead to getting started.
+For more details see the [overview](docs/overview.html) to understand why this exists or skip ahead to [getting started](docs/getting-started/index.html).
