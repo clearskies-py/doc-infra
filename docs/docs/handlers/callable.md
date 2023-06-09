@@ -52,22 +52,17 @@ callable_demo = clearskies.contexts.cli(
 callable_demo()
 {% endhighlight %}
 
-The above example can be [executed via the CLI](/docs/running-examples.html#running-examples-designed-for-the-cli).  Of course, the CLI handler works just as well in a web context.  However, a web context requires you to specify the authenticaton method, so you have to explicitly provide the handler and configuration:
+The above example can be [executed via the CLI](/docs/running-examples.html#running-examples-designed-for-the-cli).  Of course, the CLI handler works just as well in a web context.  However, a web context requires you to specify the authenticaton method.  To help with this, there are decorators for every configuration option in the callable handler:
 
 {% highlight python %}
 import clearskies
 
+@clearskies.decorators.public()
 def example_callable(test_binding):
     return f'Hello {test_binding}'
 
 callable_demo = clearskies.contexts.wsgi(
-    {
-        'handler_class': clearskies.handlers.Callable,
-        'handler_config': {
-            'authentication': clearskies.authentication.public(),
-            'callable': example_callable,
-        },
-    },
+    example_callable,
     bindings={
         'test_binding': 'world',
     }
@@ -101,18 +96,13 @@ The `return_raw_response` configuration accepts a boolean.  If it is true, then 
 {% highlight python %}
 import clearskies
 
+@clearskies.decorators.public()
+@clearskies.decorators.return_raw_response()
 def example_callable(test_binding):
     return f'Hello {test_binding}'
 
 callable_demo = clearskies.contexts.wsgi(
-    {
-        'handler_class': clearskies.handlers.Callable,
-        'handler_config': {
-            'authentication': clearskies.authentication.public(),
-            'callable': example_callable,
-            'return_raw_response': True,
-        },
-    },
+    example_callable,
     bindings={
         'test_binding': 'world',
     }
@@ -149,9 +139,6 @@ from clearskies.column_types import string, float
 from clearskies.input_requirements import required
 from collections import OrderedDict
 
-def example_callable(request_data):
-    return request_data
-
 class Product(clearskies.Model):
     def __init__(self, memory_backend, columns):
         super().__init__(memory_backend, columns)
@@ -162,16 +149,12 @@ class Product(clearskies.Model):
             float('price'),
         ])
 
-callable_demo = clearskies.contexts.wsgi(
-    {
-        'handler_class': clearskies.handlers.Callable,
-        'handler_config': {
-            'authentication': clearskies.authentication.public(),
-            'callable': example_callable,
-            'schema': Product,
-        },
-    },
-)
+@clearskies.decorators.public()
+@clearskies.decorators.schema(Product)
+def example_callable(request_data):
+    return request_data
+
+callable_demo = clearskies.contexts.wsgi(example_callable)
 def application(env, start_response):
     return callable_demo(env, start_response)
 {% endhighlight %}
@@ -227,22 +210,15 @@ import clearskies
 from clearskies.column_types import string, float
 from clearskies.input_requirements import required
 
+@clearskies.decorators.public()
+@clearskies.decorators.schema([
+    string('name', input_requirements=[required()]),
+    float('price'),
+])
 def example_callable(request_data):
     return request_data
 
-callable_demo = clearskies.contexts.wsgi(
-    {
-        'handler_class': clearskies.handlers.Callable,
-        'handler_config': {
-            'authentication': clearskies.authentication.public(),
-            'callable': example_callable,
-            'schema': [
-                string('name', input_requirements=[required()]),
-                float('price'),
-            ],
-        },
-    },
-)
+callable_demo = clearskies.contexts.wsgi(example_callable)
 def application(env, start_response):
     return callable_demo(env, start_response)
 {% endhighlight %}
@@ -257,9 +233,6 @@ from clearskies.column_types import string, float
 from clearskies.input_requirements import required
 from collections import OrderedDict
 
-def example_callable(request_data):
-    return request_data
-
 class Product(clearskies.Model):
     def __init__(self, memory_backend, columns):
         super().__init__(memory_backend, columns)
@@ -270,18 +243,15 @@ class Product(clearskies.Model):
             float('price'),
         ])
 
-callable_demo = clearskies.contexts.wsgi(
-    {
-        'handler_class': clearskies.handlers.Callable,
-        'handler_config': {
-            'authentication': clearskies.authentication.public(),
-            'callable': example_callable,
-            'schema': Product,
-        },
-    },
-)
+@clearskies.decorators.schema(Product, writeable_columns=['price'])
+@clearskies.decorators.public()
+def example_callable(request_data):
+    return request_data
+
+callable_demo = clearskies.contexts.wsgi(example_callable)
 def application(env, start_response):
     return callable_demo(env, start_response)
+
 {% endhighlight %}
 
 If you [run it locally](docs/running-examples.html#running-examples-designed-for-an-http-server) and call the server like so:
@@ -306,7 +276,7 @@ you will get an input error:
 
 Since the `name` column is not in the list of writeable columns (even though it exists in the model) clearskies returns an input error if the client tries to set it.
 
-**Note:** This has a subtle but important implication: it effectively disables the "required" setting of the `name` column.  Since the name is no longer exposed from this endpoint, it is necessarily _not_ a required input.
+**Note:** This has a subtle but important implication: it effectively disables the "required" setting of the `name` column.  Since the name is no longer exposed from this endpoint, and thus a client cannot set it, it clearly cannot be a required column here.
 
 ### Doc Model Name
 

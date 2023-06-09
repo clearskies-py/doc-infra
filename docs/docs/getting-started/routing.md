@@ -178,4 +178,4 @@ ValueError: I couldn't find any authentication rules while auto-importing your r
 
 ## Additional Options
 
-There is a decorator available for [all the configuration options available to the callable handler](/docs/handlers/callable.html#configuration).  For the list and examples, [see the docs about decorators](/docs/routing-decorators/index.html).
+There is a decorator for [all the configuration options available to the callable handler](/docs/handlers/callable.html#configuration).  For the list and examples, [see the docs about decorators](/docs/routing-decorators/index.html).

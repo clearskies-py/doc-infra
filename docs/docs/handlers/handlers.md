@@ -8,7 +8,9 @@ nav_order: 4
 
 # Handlers
 
-Handlers are the basic unit of work in clearskies.  Each handler executes a particular "kind" of pre-defined functionality: call a function, perform routing, implement a RESTful API, expose a health check, migrate a database, etc...  In essence, these are the building blocks of applications in clearskies and can be mixed and matched as needed.  To make use of handlers you specifcy the class of the one which you want clearskies to execute, as well as it's configuration - all handlers accept some configuration options to control their behavior.  Handlers can be packaged up in applications to create code which is ready to execute, as well as being attached directly to a context (as we have done thus far in our examples).
+Handlers are a key feature of clearskies and also a differentiating factor from most other frameworks.  Typical frameworks are based around the concept of "when my endpoint is called execute this function that I will defined".  In contrast, clearskies comes with a variety of pre-defined "kinds" of functionality designed to fulfill common application needs.  That's where handlers come in.  The most basic handler is the `Callable` handler which will simply execute a function you defined.  Thus, you can still build your applications one function at a time, if you really want to.  However, if clearskies happens to have a handler that does what you are trying to do, then you can easily save hundreds of lines of code.  The most commonly used handlers might call a function, handle routing, implement a RESTful API, expose a healthcheck, generate your swagger documentation, etc...
+
+To make use of handlers you specifcy the class of the one which you want clearskies to execute, as well as it's configuration - all handlers accept some configuration options to control their behavior.  Handlers can be packaged up in applications to create code which is ready to execute, as well as being attached directly to a context (as we have done thus far in our examples).
 
 The simplest handler is the `Callable` handler, which simply executes a function.  We've already been using this in our examples thus far:
 
