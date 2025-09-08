@@ -28,10 +28,10 @@ jobs:
       - uses: opentofu/setup-opentofu@v1
         with:
           tofu_version_file: .opentofu-version
-      - name: AWS Login
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
         with:
-          role-to-assume: ${{ secrets.AWS_LOGIN_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
       - run: tofu init
       - name: Download plan file
