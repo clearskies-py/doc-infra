@@ -1,23 +1,19 @@
 variable "route_53_hosted_zone_name" {
-  type = string
+  type        = string
   description = "The name of the route 53 hosted zone for our site"
+  default     = "clearskies.info"
 }
 
 variable "domain" {
-  type = string
+  type        = string
   description = "The domain for the site"
-}
-
-variable "cloudfront_password" {
-  type = string
-  description = "A 'password' shared by cloudfront and the bucket, which helps lock the bucket down to cloudfront"
-  sensitive = true
+  default     = "clearskies.info"
 }
 
 variable "aws_region" {
-  type = string
+  type        = string
   description = "The AWS region for all of this."
-  default = "us-east-1"
+  default     = "us-east-1"
 }
 
 variable "trusted_signers" {

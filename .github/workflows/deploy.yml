@@ -1,0 +1,44 @@
+defaults:
+  run:
+    shell: bash
+
+on:
+  push:
+    branches:
+      - main  # Change 'main' to your actual default branch name if different
+
+jobs:
+  plan:
+    uses: ./.github/workflows/plan.yml
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+  deploy-infrastructure:
+    needs: [plan]
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version_file: .opentofu-version
+      - name: AWS Login
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_LOGIN_ROLE_ARN }}
+          aws-region: us-east-1
+      - run: tofu init
+      - name: Download plan file
+        uses: actions/download-artifact@v4
+        with:
+          name: plan-out
+          path: .
+      - name: Deploy
+        id: deploy
+        run: tofu apply --auto-approve plan.out

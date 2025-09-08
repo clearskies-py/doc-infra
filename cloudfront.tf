@@ -1,18 +1,30 @@
+resource "aws_cloudfront_function" "rewrite_index" {
+  name    = "rewrite-index"
+  runtime = "cloudfront-js-1.0"
+  comment = "Rewrite folder requests to index.html"
+  code    = <<EOF
+function handler(event) {
+  var request = event.request;
+  // Only rewrite if ends with '/' and does not look like a file
+  if (request.uri.endsWith('/') && !request.uri.match(/\/[^\/]+\\.[^\/]+$/)) {
+    request.uri += 'index.html';
+  }
+  return request;
+}
+EOF
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = aws_s3_bucket.site_bucket.bucket_regional_domain_name
-    origin_id   = "${var.domain}-static-cloudfront"
+    domain_name              = aws_s3_bucket.site_bucket.bucket_regional_domain_name
+    origin_id                = "${var.domain}-static-cloudfront"
+    origin_access_control_id = aws_cloudfront_origin_access_control.site_oac.id
 
     custom_origin_config {
       origin_protocol_policy = "http-only"
       http_port              = "80"
       https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1"]
-    }
-
-    custom_header {
-      name  = "User-Agent"
-      value = var.cloudfront_password
+      origin_ssl_protocols   = ["TLSv3.1"]
     }
   }
 
@@ -24,7 +36,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   viewer_certificate {
     acm_certificate_arn = aws_acm_certificate.cert.arn
-    ssl_support_method = "sni-only"
+    ssl_support_method  = "sni-only"
   }
 
   default_cache_behavior {
@@ -49,6 +61,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     // This redirects any HTTP request to HTTPS. Security first!
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.rewrite_index.arn
+    }
   }
 
   restrictions {

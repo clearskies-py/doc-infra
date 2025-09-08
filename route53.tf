@@ -40,7 +40,19 @@ resource "aws_route53_record" "record_a" {
   type    = "A"
 
   alias {
-    name                   = replace(aws_cloudfront_distribution.s3_distribution.domain_name, "/[.]$/", "")
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
+resource "aws_route53_record" "record_aaaa" {
+  zone_id = data.aws_route53_zone.zone.id
+  name    = var.domain
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
     zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
     evaluate_target_health = true
   }
