@@ -1,6 +1,13 @@
+
+defaults:
+  run:
+    shell: bash
+
 on:
+  push:
+    branches:
+      - main
   pull_request:
-  workflow_call:
 
 jobs:
   plan:
@@ -23,21 +30,17 @@ jobs:
       - name: OpenTofu fmt
         id: fmt
         run: tofu fmt -check
-
       - name: OpenTofu Init
         id: init
         run: tofu init
-
       - name: OpenTofu Validate
         id: validate
         run: tofu validate -no-color
-
       - name: OpenTofu Plan (pull request)
         if: github.event_name == 'pull_request'
         id: plan
         run: tofu plan -no-color -input=false
         timeout-minutes: 3
-
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:
@@ -95,15 +98,41 @@ jobs:
                 body: output
               })
             }
-
       - name: OpenTofu Plan (main branch)
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        if: github.ref == 'refs/heads/main'
         id: plan-main
         run: tofu plan -no-color -out plan.out -input=false
-
       - name: Upload plan file (main branch)
-        if: github.ref == format('refs/heads/{0}', env.DEFAULT_BRANCH)
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: plan-out
           path: plan.out
+
+  deploy-infrastructure:
+    if: github.ref == 'refs/heads/main'
+    needs: plan
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version_file: .opentofu-version
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - run: tofu init
+      - name: Download plan file
+        uses: actions/download-artifact@v4
+        with:
+          name: plan-out
+          path: .
+      - name: Deploy
+        id: deploy
+        run: tofu apply --auto-approve plan.out
