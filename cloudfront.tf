@@ -20,11 +20,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     origin_id                = "${var.domain}-static-cloudfront"
     origin_access_control_id = aws_cloudfront_origin_access_control.site_oac.id
 
-    custom_origin_config {
-      origin_protocol_policy = "http-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1.2"]
+    s3_origin_config {
+      origin_access_identity = "" # Must be empty when using OAC
     }
   }
 
