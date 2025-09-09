@@ -5,9 +5,14 @@ resource "aws_cloudfront_function" "rewrite_index" {
   code    = <<EOF
 function handler(event) {
   var request = event.request;
-  // Only rewrite if ends with '/' and does not look like a file
-  if (request.uri.endsWith('/') && !request.uri.match(/\/[^\/]+\\.[^\/]+$/)) {
-    request.uri += 'index.html';
+  // If the URI does not have a file extension, rewrite to /index.html
+  if (!request.uri.match(/\.[^\/]+$/)) {
+    if (request.uri.endsWith('/')) {
+      request.uri += 'index.html';
+    } else {
+      // If it doesn't end with '/', add /index.html
+      request.uri += '/index.html';
+    }
   }
   return request;
 }
